@@ -1,0 +1,48 @@
+app = "owncast"
+kill_signal = "SIGINT"
+kill_timeout = 5
+processes = []
+
+[env]
+
+[experimental]
+  allowed_public_ports = []
+  auto_rollback = true
+
+[build]
+  image = "gabekangas/owncast:latest"
+
+[mounts]
+  source="owncast_data"
+  destination="/app/data"
+
+[[services]]
+  internal_port = 8080
+  processes = ["app"]
+  protocol = "tcp"
+
+  [[services.ports]]
+    force_https = true
+    handlers = ["http"]
+    port = 80
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+
+  [[services.tcp_checks]]
+    grace_period = "1s"
+    interval = "15s"
+    restart_limit = 0
+    timeout = "2s"
+
+[[services]]
+  internal_port = 1935
+  protocol = "tcp"
+
+  [[services.ports]]
+    port = 1935
+
+  [[services.ports]]
+    handlers = ["tls"]
+    port = 1936
